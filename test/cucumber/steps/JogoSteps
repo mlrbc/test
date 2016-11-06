@@ -1,0 +1,160 @@
+package steps
+
+import cucumber.api.PendingException
+import ga.JogoController
+import ga.Jogo
+
+this.metaClass.mixin(cucumber.api.groovy.Hooks)
+this.metaClass.mixin(cucumber.api.groovy.EN)
+
+static def criarJogo (String data, String mandante, String visitante, String placar, JogoController controlador ) {
+    Jogo game = new Jogo([mandante: mandante, visitante: visitante, placar: placar, data: data])
+    controlador.save(game)
+   }
+
+static def removerJogo (Date data, JogoController controlador) {
+    Jogo jogo = Jogo.findByData(data)
+    controlador.delete(jogo)
+}
+
+//Novo Jogo
+Given(~/^que o sistema não possua nenhum jogo no dia "([^"]*)"$/) { String data ->
+    assert findByData(data) == false
+}
+
+When(~/^eu crio um jogo "([^"]*)" com mandante "([^"]*)", Visitante "([^"]*)" e placar "([^"]*)"$/) { String data, String mandante, String visitante, String placar ->
+    def controlador = new JogoController()
+    criarJogo(data,mandante,visitante,placar,controlador)
+}
+
+Then(~/^o jogo "([^"]*)" é arquivado com sucesso no systema$/) { String data ->
+   assert findByData(data) == true
+}
+
+// Jogo no mesmo dia
+Given(~/^que o sistema possui um jogo com data "([^"]*)" com arquivo "([^"]*)"$/) { String data, String arquivoNome ->
+    assert findByData(data) == true
+
+}
+
+When(~/^eu crio um jogo "([^"]*)"com mandante "([^"]*)", Visitante "([^"]*)" e placar "([^"]*)"$/) { String data, String mandante, String visitante, String placar ->
+    def controlador = new JogoController()
+    criarJogo(data,mandante,visitante,placar,controlador)
+
+}
+Then(~/^o jogo "([^"]*)" não é salvo pelo systema pois já existe um jogo com a mesma data$/) { String data ->
+
+}
+
+// Remover Jogo
+Given(~/^que o sistema possui um jogo com data "([^"]*)" com arquivo "([^"]*)"$/){ String data, String arquivo ->
+    assert findByData(data) == true
+}
+When(~/^eu removo o jogo"([^"]*)"$/) { Date data ->
+   def controlador = new JogoController()
+   removerJogo(data,controlador)
+}
+Then(~/^o jogo "([^"]*)" não está salvo no sistema$/) { String data ->
+    assert findByData(data) == false
+}
+
+// Remover Jogo não existente
+Given(~/^que o sistema não possua nenhum jogo no dia "([^"]*)"$/) { String data ->
+    assert findByData(data) == false
+}
+When(~/^eu removo o jogo "([^"]*)"$/) { Date data ->
+    def controlador = new JogoController()
+    removerJogo(data,controlador)
+}
+Then(~/^o sistema informa que não existe o jogo "([^"]*)" no sistema$/) { String data ->
+
+}
+
+// Editar Jogador
+//Given(~/^que o sistema possui um jogo com data "([^"]*)" com arquivo "([^"]*)"$/) { String data, String arquivo ->
+//    assert page.jogoArquivo(data,arquivo)
+//}
+//
+//When(~/^eu escolho o jogo "([^"]*)"$/) { String jogo ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//    page.selectJogo(jogo)
+//}
+//
+//And(~/^eu seleciono para editar o jogo$/) { String jogo ->
+//    to InfoJogo
+//    at InfoJogo
+//    page.editarJogo(jogo)
+//}
+//Then(~/^eu edito o jogo "([^"]*)" e as alterações são salvas pelo sistema$/) { String jogo ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//    assert page.msgEdicaoSucesso
+//}
+//
+//// Ver Jogo Passado
+//Given(~/^eu estou no menu de jogos do time$/) { ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//}
+//When(~/^eu escolho o jogo "([^"]*)" na lista de jogos existentes$/) { String jogo ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//    page.selectJogo(jogo)
+//}
+//Then(~/^o sistema mostra as informações sobre o jogo "([^"]*)"$/) { String jogo ->
+//    to InfoJogo
+//    at InfoJogo
+//}
+//
+////Ver jogadores titulares e substituidos em um jogo
+//Given(~/^eu estou no menu dos jogos do time$/) { ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//}
+//When(~/^eu escolho o jogo "([^"]*)" na lista de jogos disponiveis$/) { String jogo ->
+//    page.selectJogo(jogo)
+//}
+//And(~/^eu escolho a aba "([^"]*)" no menu de opções do jogo$/) { String aba ->
+//    to InfoJogo
+//    at InfoJogo
+//    page.selectTitulares(aba)
+//}
+//Then(~/^o sistema mostra os jogadores que foram titulares na partida e jogadores que entraram por meio de substituições$/) {
+//    to TitularesJogo
+//    at TitularesJogo
+//}
+//// Ver gols de um jogo
+//Given(~/^eu estou no menu de jogos do time$/) {
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//}
+//When(~/^eu escolho o jogo "([^"]*)" na lista de jogos disponiveis$/) { String jogo ->
+//    page.selectJogo(jogo)
+//}
+//And(~/^eu escolho a aba "([^"]*)" no menu de opções do jogo$/) { String aba ->
+//    to InfoJogo
+//    at InfoJogo
+//    page.selectGols(aba)
+//}
+//Then(~/^o sistema mostra quais jogadores marcaram gols na partida$/) { ->
+//    to GolsJogo
+//    at GolsJogo
+//}
+//// Ver jogadores relacionados para um jogo
+//Given(~/^eu estou no menu de jogos disponiveis$/) { ->
+//    to VisualizacaoJogo
+//    at VisualizacaoJogo
+//}
+//When(~/^eu escolho o jogo "([^"]*)" na lista de jogos disponiveis$/) { String jogo ->
+//    page.selectJogo(jogo)
+//}
+//And(~/^eu escolho a aba "([^"]*)" no menu de opções de jogo$/) { String data ->
+//    to InfoJogo
+//    at InfoJogo
+//    page.selectRelacionados
+//}
+//Then(~/^o sistema mostra quais jogadores foram relacionados para a partida$/) { ->
+//    to RelacionadosJogo
+//    at RelacionadosJogo
+//}
