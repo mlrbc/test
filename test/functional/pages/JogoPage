@@ -1,0 +1,16 @@
+package pages
+
+import geb.Page
+import steps.InternationalizationHelper
+
+class JogoPage extends Page {
+    static url = '/GA/jogo'
+
+    static at = {
+        InternationalizationHelper helper = InternationalizationHelper.instance
+        String jogo = "Jogos"
+        String pageTitle = helper.getMessage("default.create.label", jogo)
+        title ==~ pageTitle
+    }
+
+}
